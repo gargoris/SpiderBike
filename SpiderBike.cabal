@@ -1,0 +1,44 @@
+name:                 SpiderBike
+version:              0.1.0.0
+synopsis:             Parser for the SpiderBike tests EDSL
+description:          This is a simple parser for SpiderBike. It's pourpose is only to generate two CSV files
+                      with the information of an input Test Suite description written in SpiderBike
+-- license:
+-- license-file:
+homepage:             
+author:               Francisco José Fuentes Rodríguez
+maintainer:           fran.fuentes@gmail.com
+category:             Text
+-- copyright:
+build-type:           Simple
+-- extra-source-files:
+cabal-version:        >=1.10
+
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Lib
+  build-depends:       base >= 4.7 && < 5
+                     , parsec
+  default-language:    Haskell2010
+
+
+
+executable SpiderBike-exe
+  hs-source-dirs:      app
+  main-is:             Main.lhs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , parsec >= 3.1.9
+                     , utf8-string >= 0.3.5
+  default-language:    Haskell2010
+
+test-suite SpiderBike-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , SpiderBike
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
