@@ -1,5 +1,5 @@
-# SpiderBike
-### Because every Iwok need a ride sometime.s..
+# SpiderBike ![Speeder Bike](/images/speederbike.png)
+### Because every Iwok need a ride sometimes..
 #### Parser for the SpiderBike language for Test definitions
 
 
