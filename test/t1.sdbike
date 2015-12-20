@@ -1,7 +1,7 @@
 Suite 1 Front de KillBol
   # Pruebas principales de front
   -- Esta es la suite de pruebas principales de la aplicación.
-  -- Se aplicará un patrón "End to End" a dichas pruebas usando tecnologíde test
+  -- Se aplicará un patrón "End to End" a dichas pruebas usando tecnologías de test
   --para AngularJS
 
   SYST 1 => Killboll
