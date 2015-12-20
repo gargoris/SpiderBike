@@ -18,6 +18,7 @@ import Prelude hiding (readFile, writeFile)
 > import Text.Parsec
 > import Text.Parsec.String
 > import Control.Monad
+> import Lib
 
 > main :: IO ()
 > main = do

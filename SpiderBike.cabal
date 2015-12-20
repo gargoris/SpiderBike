@@ -17,6 +17,7 @@ cabal-version:        >=1.10
 
 library
   hs-source-dirs:      src
+  exposed:             True
   exposed-modules:     Lib
   build-depends:       Cabal >= 1.22.5.0
                      , base >= 4.7 && < 5
@@ -30,6 +31,7 @@ executable SpiderBike-exe
   main-is:             Main.lhs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       Cabal >= 1.22.5.0
+                     , SpiderBike >= 0.1.0.0
                      , base
                      , parsec >= 3.1.9
                      , utf8-string >= 0.3.5
@@ -41,6 +43,7 @@ test-suite SpiderBike-test
   main-is:             Spec.hs
   build-depends:       Cabal >= 1.22.5.0
                      , SpiderBike
+                     , SpiderBike >= 0.1.0.0
                      , base
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
