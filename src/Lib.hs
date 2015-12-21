@@ -44,7 +44,7 @@ whitespace = void $ oneOf " \t"
 
 -- |Left the whitespaces for hungries gnomes
 lexeme :: Parser a -> Parser a
-lexeme p = p <* whitespace
+lexeme p = p <* optional whitespace
 
 
 -- |A number
@@ -53,7 +53,7 @@ num = read <$> many1 digit
 
 -- |A id with spaces...
 ident :: Parser String
-ident = (:) <$> alphaNum <*> oneS
+ident = (++) <$> many1 alphaNum <*> oneS
 
 oneS :: Parser String
 oneS = (++) <$> many (oneOf " \t") <*> many1 alphaNum
