@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Lib
   (
   someFunc,
@@ -5,7 +6,7 @@ module Lib
   suiteParser
   ) where
 
-import Control.Applicative ((<$>), (<*>), (<*), (*>), (<|>), many, (<$))
+-- import Control.Applicative ((<$>), (<*>), (<*), (*>), (<|>), many, (<$))
 import Data.Char (isLetter, isDigit)
 import Text.ParserCombinators.Parsec
 import Text.Parsec
@@ -16,16 +17,43 @@ someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
 -- |Full test suite
-data Suite = Suite {getName :: String} deriving (Show)
-
+data Suite = Suite
+             {
+               id   :: Integer,
+               name :: String
+             } deriving (Show)
+data Doc = Doc
+           {
+             title :: String,
+             comments :: String
+           }
+  
 -- |Full parser, returns a Suite if received a correct input
 suiteParser :: Parser Suite
-suiteParser = Suite <$> string "Suite"
+suiteParser = do
+  _    <- lexeme (string "Suite")
+  n    <- lexeme (num)
+  name <- lexeme (ident)
+  _    <- endOfLine
+  return (Suite n name)
+
+-- |Clean the whitespace... but no carriage returns
+whitespace :: Parser ()
+whitespace = void $ oneOf " \t"
 
 
--- |A structural parser. It gets three parsers: one for starting,
--- other for ending, and a last one for the middle part. The idea
--- is to check if a block stars and ends with special delimiters
--- dropables and its inners honor some other parser
-structP :: Parser a -> Parser b -> Parser c -> Parser c
-structP start end t = start *> t <* end
+-- |Left the whitespaces for hungries gnomes
+lexeme :: Parser a -> Parser a
+lexeme p = p <* whitespace
+
+
+-- |A number
+num :: Parser Integer
+num = read <$> many1 digit
+
+-- |A id with spaces...
+ident :: Parser String
+ident = (:) <$> alphaNum <*> oneS
+
+oneS :: Parser String
+oneS = (++) <$> many (oneOf " \t") <*> many1 alphaNum
