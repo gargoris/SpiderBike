@@ -12,6 +12,7 @@ import Text.ParserCombinators.Parsec
 import Text.Parsec
 import Text.Parsec.String
 import Control.Monad
+import Data.String.Utils
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
@@ -19,41 +20,71 @@ someFunc = putStrLn "someFunc"
 -- |Full test suite
 data Suite = Suite
              {
-               id   :: Integer,
-               name :: String
+               id   :: Integer
+               , name :: String
+               , doc  :: Doc
              } deriving (Show)
-data Doc = Doc
-           {
-             title :: String,
-             comments :: String
-           }
-  
+data Doc = Doc String deriving (Show) --String
+--           {
+--             title :: String,
+--             comments :: String
+--           }
+
 -- |Full parser, returns a Suite if received a correct input
 suiteParser :: Parser Suite
 suiteParser = do
   _    <- lexeme (string "Suite")
-  n    <- lexeme (num)
-  name <- lexeme (ident)
+  n    <- integer
+  name <- ident
   _    <- endOfLine
-  return (Suite n name)
+  doc  <- parseDoc
+  return (Suite n (rstrip name) doc)
+
 
 -- |Clean the whitespace... but no carriage returns
 whitespace :: Parser ()
-whitespace = void $ oneOf " \t"
-
+whitespace = void $ many $ oneOf " \t"
 
 -- |Left the whitespaces for hungries gnomes
 lexeme :: Parser a -> Parser a
-lexeme p = p <* optional whitespace
+lexeme p = p <* whitespace
+
+-- |Reading an number, an integer
+integer :: Parser Integer
+integer = read <$> lexeme (many1 digit)
+
+-- |An identifier
+identifier :: Parser String
+identifier = lexeme ((:) <$> firstChar <*> many nonFirstChar)
+  where
+    firstChar = letter <|> char '_'
+    nonFirstChar = digit <|> firstChar
+
+symbol :: String -> Parser String
+symbol s = lexeme $ string s
 
 
 -- |A number
 num :: Parser Integer
 num = read <$> many1 digit
 
--- |A id with spaces...
+-- |A id with spaces (multi-word). As a non desired effect, this returns all
+-- all trailling spaces to EOL
 ident :: Parser String
-ident = (++) <$> many1 alphaNum <*> oneS
+ident = (++) <$> many1 alphaNum <*> many (oneOf " \t" <|> alphaNum)
 
-oneS :: Parser String
-oneS = (++) <$> many (oneOf " \t") <*> many1 alphaNum
+-- |Documentation, a title and a bunch of lines.
+parseDoc :: Parser Doc
+parseDoc = Doc <$> parseTitle
+
+-- |Parsing a title or a one line comment
+parseTitle :: Parser String
+parseTitle = do
+  _ <- whitespace
+  _ <- lexeme (char '#')
+  n <- ident
+  return n
+
+-- |Parsing a multi line comment
+--parseComs :: Parser String
+--parseComs = whitespace *> char "-" *> char "-" 
