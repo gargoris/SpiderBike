@@ -5,53 +5,63 @@ module Lib
     -- * Data Structures
     Suite,
     Doc,
+    System,
+    Module,
 
     -- * Main function
     suiteParser
   ) where
 
 -- import Control.Applicative ((<$>), (<*>), (<*), (*>), (<|>), many, (<$))
-import Data.Char (isLetter, isDigit)
-import Text.ParserCombinators.Parsec
-import Text.Parsec
-import Text.Parsec.String
-import Control.Monad
-import Data.String.Utils
-
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import           Control.Monad
+import           Data.Char                     (isDigit, isLetter)
+import           Data.String.Utils
+import           Text.Parsec
+import           Text.Parsec.String
+import           Text.ParserCombinators.Parsec
 
 -- |Full test suite
 data Suite = Suite
              {
-               id     :: Integer
-             , name   :: String
-             , doc    :: Doc
+               suiteId   :: Integer
+             , suiteName :: String
+             , doc       :: Doc
+             , systems   :: [System]
              } deriving (Show)
-data Doc = Doc 
+data Doc = Doc
            {
              title    :: String
            , comments :: String
            } deriving (Show)
+data System = System
+              {
+                systemId   :: Integer
+              , systemName :: String
+              } deriving (Show)
+data Module = Module
+              {
+                moduleId   :: Integer
+              , moduleTec  :: String
+              , moduleName :: String
+              } deriving(Show)
 
 -- |Full parser, returns a Suite if received a correct input
 suiteParser :: Parser Suite
 suiteParser = do
-  _    <- whitespace
-  _    <- lexeme (string "Suite")
-  n    <- integer
+  n    <- identifyCode "Suite"
   name <- ident
   _    <- endOfLine
   doc  <- parseDoc
-  return (Suite n (rstrip name) doc)
+  syst <- many systemParser
+  return (Suite n (rstrip name) doc syst)
 
+-- |Module
+moduleParser :: Parser Module
+moduleParser = Module <$> identifyCode "M" <*> (char '(' *> ident <* char ')') <*> ((lexeme (string "=>")) *> ident)
 
-
-
--- |A id with spaces (multi-word). As a non desired effect, this returns all
--- all trailling spaces to EOL
-ident :: Parser String
-ident = (++) <$> many1 alphaNum <*> many (oneOf " \t" <|> alphaNum)
+-- |System, a parser...
+systemParser :: Parser System
+systemParser = System <$> identifyCode "SYST" <*> (lexeme (string "=>") *> ident)
 
 -- |Documentation, a title and a bunch of lines.
 parseDoc :: Parser Doc
@@ -69,10 +79,23 @@ parseComs :: Parser String
 parseComs = concat <$> many1 parseComs'
 
 -- From here, the utilities
+-- |Starts with spaces, a keyword and a number....
+identifyCode :: String -> Parser Integer
+identifyCode t = whitespaceBeg *> lexeme (string t) *> integer
 
--- |Clean the whitespace... but no carriage returns
+-- |A id with spaces (multi-word). As a non desired effect, this returns all
+-- all trailling spaces to EOL
+ident :: Parser String
+ident = (++) <$> many1 alphaNum <*> many (oneOf " \t" <|> alphaNum)
+
+-- |Clean the whitespace, beggining of line
+whitespaceBeg :: Parser ()
+whitespaceBeg = void $ many $ oneOf " \t\n"
+
+-- |Clean the whitespace...
 whitespace :: Parser ()
 whitespace = void $ many $ oneOf " \t"
+
 
 -- |Left the whitespaces for hungries gnomes
 lexeme :: Parser a -> Parser a
