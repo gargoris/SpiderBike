@@ -21,30 +21,37 @@ import           Text.Parsec.String
 import           Text.ParserCombinators.Parsec
 
 -- |Full test suite
-data Suite = Suite
-             {
-               suiteId   :: Integer
-             , suiteName :: String
-             , doc       :: Doc
-             , systems   :: [System]
-             } deriving (Show)
-data Doc = Doc
-           {
-             title    :: String
-           , comments :: String
-           } deriving (Show)
+data Suite  = Suite
+              {
+                suiteId    :: Integer
+              , suiteName  :: String
+              , doc        :: Doc
+              , systems    :: [System]
+              } deriving (Show)
+data Doc    = Doc
+              {
+                title      :: String
+              , comments   :: String
+              } deriving (Show)
 data System = System
               {
                 systemId   :: Integer
               , systemName :: String
+              , modules    :: [Module]
               } deriving (Show)
 data Module = Module
               {
                 moduleId   :: Integer
               , moduleTec  :: String
               , moduleName :: String
+              , functions  :: [Function]
               } deriving(Show)
-
+data Function = Function
+                {
+                  functionId :: Integer
+                , functionDesc :: String
+                } deriving (Show)
+                        
 -- |Full parser, returns a Suite if received a correct input
 suiteParser :: Parser Suite
 suiteParser = do
@@ -55,33 +62,57 @@ suiteParser = do
   syst <- many systemParser
   return (Suite n (rstrip name) doc syst)
 
+-- |Function
+functionParser :: Parser Function
+functionParser = Function
+                 <$> identifyCode "F"
+                 <*> (lexeme (string "=>") *> ident)
+
 -- |Module
 moduleParser :: Parser Module
-moduleParser = Module <$> identifyCode "M" <*> (char '(' *> ident <* char ')') <*> ((lexeme (string "=>")) *> ident)
+moduleParser = Module
+               <$> identifyCode "M"
+               <*> lexeme (char '(' *> ident <* char ')')
+               <*> ((lexeme (string "=>")) *> ident)
+               <*> many functionParser
 
 -- |System, a parser...
 systemParser :: Parser System
-systemParser = System <$> identifyCode "SYST" <*> (lexeme (string "=>") *> ident)
+systemParser = System
+               <$> identifyCode "SYST"
+               <*> (lexeme (string "=>") *> ident)
+               <*> many moduleParser
 
 -- |Documentation, a title and a bunch of lines.
 parseDoc :: Parser Doc
-parseDoc = Doc <$> parseTitle <*> parseComs
+parseDoc = Doc
+           <$> parseTitle
+           <*> parseComs
 
 -- |Parsing a title or a one line comment
 parseTitle :: Parser String
-parseTitle = whitespace *> (symbol "#") *> identifier <* optional endOfLine
+parseTitle = whitespace
+             *> (symbol "#")
+             *> identifier
+             <* optional endOfLine
 
 -- |Parsing a line for a multine comment
 parseComs' :: Parser String
-parseComs' = whitespace *> (symbol "--") *> identifier <* endOfLine
+parseComs' = whitespace
+             *> (symbol "--")
+             *> identifier
+             <* endOfLine
 
 parseComs :: Parser String
-parseComs = concat <$> many1 parseComs'
+parseComs = concat
+            <$> many1 parseComs'
 
 -- From here, the utilities
 -- |Starts with spaces, a keyword and a number....
 identifyCode :: String -> Parser Integer
-identifyCode t = whitespaceBeg *> lexeme (string t) *> integer
+identifyCode t = whitespaceBeg
+                 *> lexeme (string t)
+                 *> integer
 
 -- |A id with spaces (multi-word). As a non desired effect, this returns all
 -- all trailling spaces to EOL
