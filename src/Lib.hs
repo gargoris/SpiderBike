@@ -28,17 +28,20 @@ data Suite  = Suite
               , doc        :: Doc
               , systems    :: [System]
               } deriving (Show)
+
 data Doc    = Doc
               {
                 title      :: String
               , comments   :: String
               } deriving (Show)
+
 data System = System
               {
                 systemId   :: Integer
               , systemName :: String
               , modules    :: [Module]
               } deriving (Show)
+
 data Module = Module
               {
                 moduleId   :: Integer
@@ -46,11 +49,42 @@ data Module = Module
               , moduleName :: String
               , functions  :: [Function]
               } deriving(Show)
+
 data Function = Function
                 {
                   functionId :: Integer
                 , functionDesc :: String
                 } deriving (Show)
+
+data TestCase = TestCase
+                {
+                  testCaseId :: Integer
+                , testCaseDesc :: String
+                , testCaseComment :: String
+                , preCond :: [String]
+                , steps :: [Steps]
+                } deriving (Show)
+
+data Steps = SimpleStep
+                {
+                  stepNumber :: Integer
+                , stepComment :: String
+                , sets :: [TwoFoldStep]
+                }
+              | ExecStep
+                {
+                  execContent :: String
+                }
+              | TestStep
+                {
+                  set :: TwoFoldStep
+                }
+              deriving (Show)
+
+data TwoFoldStep = TwoFoldStepS String String
+                 | TwoFoldStepI String Integer
+                 deriving (Show)
+  
                         
 -- |Full parser, returns a Suite if received a correct input
 suiteParser :: Parser Suite
@@ -61,6 +95,14 @@ suiteParser = do
   doc  <- parseDoc
   syst <- many systemParser
   return (Suite n (rstrip name) doc syst)
+
+-- |Test Case
+testCaseParser :: Parser TestCase
+testCaseParser = TestCase
+                 <$> identifyCode "C"
+                 <*> (lexeme (string "=>") *> ident)
+                 <*> parseTitle
+
 
 -- |Function
 functionParser :: Parser Function
