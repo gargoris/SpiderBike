@@ -23,16 +23,16 @@ import           Text.ParserCombinators.Parsec
 -- |Full test suite
 data Suite  = Suite
               {
-                suiteId    :: Integer
-              , suiteName  :: String
-              , doc        :: Doc
-              , systems    :: [System]
+                suiteId   :: Integer
+              , suiteName :: String
+              , doc       :: Doc
+              , systems   :: [System]
               } deriving (Show)
 
 data Doc    = Doc
               {
-                title      :: String
-              , comments   :: String
+                title    :: String
+              , comments :: String
               } deriving (Show)
 
 data System = System
@@ -52,24 +52,24 @@ data Module = Module
 
 data Function = Function
                 {
-                  functionId :: Integer
+                  functionId   :: Integer
                 , functionDesc :: String
                 } deriving (Show)
 
 data TestCase = TestCase
                 {
-                  testCaseId :: Integer
-                , testCaseDesc :: String
+                  testCaseId      :: Integer
+                , testCaseDesc    :: String
                 , testCaseComment :: String
-                , preCond :: [String]
-                , steps :: [Steps]
+                --, preCond :: [String]
+                --, steps :: [Steps]
                 } deriving (Show)
 
 data Steps = SimpleStep
                 {
-                  stepNumber :: Integer
+                  stepNumber  :: Integer
                 , stepComment :: String
-                , sets :: [TwoFoldStep]
+                , sets        :: [TwoFoldStep]
                 }
               | ExecStep
                 {
@@ -84,8 +84,8 @@ data Steps = SimpleStep
 data TwoFoldStep = TwoFoldStepS String String
                  | TwoFoldStepI String Integer
                  deriving (Show)
-  
-                        
+
+
 -- |Full parser, returns a Suite if received a correct input
 suiteParser :: Parser Suite
 suiteParser = do
@@ -115,7 +115,7 @@ moduleParser :: Parser Module
 moduleParser = Module
                <$> identifyCode "M"
                <*> lexeme (char '(' *> ident <* char ')')
-               <*> ((lexeme (string "=>")) *> ident)
+               <*> (lexeme (string "=>") *> ident)
                <*> many functionParser
 
 -- |System, a parser...
@@ -134,14 +134,14 @@ parseDoc = Doc
 -- |Parsing a title or a one line comment
 parseTitle :: Parser String
 parseTitle = whitespace
-             *> (symbol "#")
+             *> symbol "#"
              *> identifier
              <* optional endOfLine
 
 -- |Parsing a line for a multine comment
 parseComs' :: Parser String
 parseComs' = whitespace
-             *> (symbol "--")
+             *> symbol "--"
              *> identifier
              <* endOfLine
 
