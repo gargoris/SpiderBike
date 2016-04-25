@@ -10,3 +10,5 @@ ride :: Iwok -> SpiderBike
 This parser takes a file written in SpiderBike and generates several CSV files with the data of the parameter file, but in tabular form suitable for another transformations.
 
 The main goal of this software is to provide a way to check the correctness of a SB file.
+
+More to come...
