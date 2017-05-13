@@ -2,3 +2,5 @@
 /TAGS
 /dist
 /texput.log
+.idea/
+*.iml
