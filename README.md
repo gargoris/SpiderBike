@@ -1,4 +1,7 @@
 # SpIderBike
+
+# As I left the company that motivated this project long time ago, there's no point on keep this project alive. Also some proyected features could be found in BDD concept + frameworks
+
 ## ![Speeder Bike](/images/speederbike.png)
 ### Because every Iwok needs a ride sometimes...
 
